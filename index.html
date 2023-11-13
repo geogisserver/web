@@ -6,112 +6,11 @@
         <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
         <meta name="mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-capable" content="yes">
-        <link rel="stylesheet" href="./resources/ol.css">
-        <link rel="stylesheet" href="resources/fontawesome-all.min.css">
-        <link rel="stylesheet" href="./resources/ol-layerswitcher.css">
-        <link rel="stylesheet" href="./resources/qgis2web.css">
-        <style>
-        .ol-geocoder.gcd-gl-container {
-            top: 100px!important;
-            left: .5em!important;
-            width: 2.1em!important;
-            height: 2.1em!important;
-        }
-        .ol-geocoder .gcd-gl-container{
-            width: 2.1em!important;
-            height: 2.1em!important;
-        }
-        .ol-geocoder .gcd-gl-control{
-            width: 2.1em!important;
-        }
-        .ol-geocoder .gcd-gl-expanded {
-            width: 15.625em!important;
-            height: 2.1875em;
-        }
-        .ol-touch .ol-geocoder.gcd-gl-container{
-            top: 130px!important;
-        }
-        .ol-geocoder .gcd-gl-btn {
-            width: 1.375em!important;
-            height: 1.375em!important;
-            top: .225em!important;
-            background-image: none!important;
-        }
-        </style>
-<style>
-.search-layer {
-  top: 135px;
-  left: .5em;
-}
-.ol-touch .search-layer {
-  top: 180px;
-}
-</style>
-        <style>
-        html, body {
-            background-color: #ffffff;
-        }
-        .ol-control button {
-            background-color: #f8f8f8 !important;
-            color: #000000 !important;
-            border-radius: 0px !important;
-        }
-        .ol-zoom, .geolocate, .gcd-gl-control .ol-control {
-            background-color: rgba(255,255,255,.4) !important;
-            padding: 3px !important;
-        }
-        .ol-scale-line {
-            background: none !important;
-        }
-        .ol-scale-line-inner {
-            border: 2px solid #f8f8f8 !important;
-            border-top: none !important;
-            background: rgba(255, 255, 255, 0.5) !important;
-            color: black !important;
-        }
-        </style>
-        <link href="resources/ol-geocoder.min.css" rel="stylesheet">
-<style>
-.tooltip {
-  position: relative;
-  background: rgba(0, 0, 0, 0.5);
-  border-radius: 4px;
-  color: white;
-  padding: 4px 8px;
-  opacity: 0.7;
-  white-space: nowrap;
-}
-.tooltip-measure {
-  opacity: 1;
-  font-weight: bold;
-}
-.tooltip-static {
-  background-color: #ffcc33;
-  color: black;
-  border: 1px solid white;
-}
-.tooltip-measure:before,
-.tooltip-static:before {
-  border-top: 6px solid rgba(0, 0, 0, 0.5);
-  border-right: 6px solid transparent;
-  border-left: 6px solid transparent;
-  content: "";
-  position: absolute;
-  bottom: -6px;
-  margin-left: -7px;
-  left: 50%;
-}
-.tooltip-static:before {
-  border-top-color: #ffcc33;
-}
-.measure-control {
-  top: 65px;
-  left: .5em;
-}
-.ol-touch .measure-control {
-  top: 80px;
-}
-</style>
+        <link rel="stylesheet" href="css/leaflet.css">
+        <link rel="stylesheet" href="css/qgis2web.css"><link rel="stylesheet" href="css/fontawesome-all.min.css">
+        <link rel="stylesheet" href="css/leaflet-search.css">
+        <link rel="stylesheet" href="css/leaflet-control-geocoder.Geocoder.css">
+        <link rel="stylesheet" href="css/leaflet-measure.css">
         <style>
         #map {
             width: 1195px;
@@ -122,21 +21,363 @@
     </head>
     <body>
         <div id="map">
-            <div id="popup" class="ol-popup">
-                <a href="#" id="popup-closer" class="ol-popup-closer"></a>
-                <div id="popup-content"></div>
-            </div>
         </div>
-        <script src="resources/qgis2web_expressions.js"></script>
-        <script src="resources/polyfills.js"></script>
-        <script src="./resources/functions.js"></script>
-        <script src="./resources/ol.js"></script>
-        <script src="./resources/ol-layerswitcher.js"></script>
-        <script src="resources/ol-geocoder.js"></script>
-        <script src="layers/Krdmir_0.js"></script><script src="layers/Kndlrvrazisahlri_7.js"></script>
-        <script src="styles/Krdmir_0_style.js"></script><script src="styles/Kndlrvrazisahlri_7_style.js"></script>
-        <script src="./layers/layers.js" type="text/javascript"></script> 
-        <script src="./resources/Autolinker.min.js"></script>
-        <script src="./resources/qgis2web.js"></script>
+        <script src="js/qgis2web_expressions.js"></script>
+        <script src="js/leaflet.js"></script>
+        <script src="js/leaflet.rotatedMarker.js"></script>
+        <script src="js/leaflet.pattern.js"></script>
+        <script src="js/leaflet-hash.js"></script>
+        <script src="js/Autolinker.min.js"></script>
+        <script src="js/rbush.min.js"></script>
+        <script src="js/labelgun.min.js"></script>
+        <script src="js/labels.js"></script>
+        <script src="js/leaflet-control-geocoder.Geocoder.js"></script>
+        <script src="js/leaflet-measure.js"></script>
+        <script src="js/leaflet-search.js"></script>
+        <script src="data/Krdmir_1.js"></script>
+        <script src="data/Kndlrvrazisahlri_7.js"></script>
+        <script>
+        var highlightLayer;
+        function highlightFeature(e) {
+            highlightLayer = e.target;
+
+            if (e.target.feature.geometry.type === 'LineString') {
+              highlightLayer.setStyle({
+                color: '#ffff00',
+              });
+            } else {
+              highlightLayer.setStyle({
+                fillColor: '#ffff00',
+                fillOpacity: 1
+              });
+            }
+            highlightLayer.openPopup();
+        }
+        var map = L.map('map', {
+            zoomControl:true, maxZoom:28, minZoom:1
+        }).fitBounds([[39.873281911262644,47.655316661156064],[40.575626911262795,49.085176021224626]]);
+        var hash = new L.Hash(map);
+        map.attributionControl.setPrefix('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>');
+        var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
+        var measureControl = new L.Control.Measure({
+            position: 'topleft',
+            primaryLengthUnit: 'meters',
+            secondaryLengthUnit: 'kilometers',
+            primaryAreaUnit: 'sqmeters',
+            secondaryAreaUnit: 'hectares'
+        });
+        measureControl.addTo(map);
+        document.getElementsByClassName('leaflet-control-measure-toggle')[0]
+        .innerHTML = '';
+        document.getElementsByClassName('leaflet-control-measure-toggle')[0]
+        .className += ' fas fa-ruler';
+        var bounds_group = new L.featureGroup([]);
+        function setBounds() {
+        }
+        map.createPane('pane_Azrbaycanxritsi_0');
+        map.getPane('pane_Azrbaycanxritsi_0').style.zIndex = 400;
+        var img_Azrbaycanxritsi_0 = 'data/Azrbaycanxritsi_0.png';
+        var img_bounds_Azrbaycanxritsi_0 = [[38.396873474,44.763450623],[41.91318512,50.378837585]];
+        var layer_Azrbaycanxritsi_0 = new L.imageOverlay(img_Azrbaycanxritsi_0,
+                                              img_bounds_Azrbaycanxritsi_0,
+                                              {pane: 'pane_Azrbaycanxritsi_0'});
+        bounds_group.addLayer(layer_Azrbaycanxritsi_0);
+        map.addLayer(layer_Azrbaycanxritsi_0);
+        function pop_Krdmir_1(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (i in e.target._eventParents) {
+                        e.target._eventParents[i].resetStyle(e.target);
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['OBJECTID'] !== null ? autolinker.link(feature.properties['OBJECTID'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Name'] !== null ? autolinker.link(feature.properties['Name'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['TypeAU'] !== null ? autolinker.link(feature.properties['TypeAU'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Subordinat'] !== null ? autolinker.link(feature.properties['Subordinat'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['StatCode'] !== null ? autolinker.link(feature.properties['StatCode'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['EconomRe'] !== null ? autolinker.link(feature.properties['EconomRe'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Area'] !== null ? autolinker.link(feature.properties['Area'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Perimetr'] !== null ? autolinker.link(feature.properties['Perimetr'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Note'] !== null ? autolinker.link(feature.properties['Note'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Shape_Leng'] !== null ? autolinker.link(feature.properties['Shape_Leng'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Shape_Area'] !== null ? autolinker.link(feature.properties['Shape_Area'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+        }
+
+        function style_Krdmir_1_0() {
+            return {
+                pane: 'pane_Krdmir_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(194,135,245,1.0)',
+                interactive: true,
+            }
+        }
+        map.createPane('pane_Krdmir_1');
+        map.getPane('pane_Krdmir_1').style.zIndex = 401;
+        map.getPane('pane_Krdmir_1').style['mix-blend-mode'] = 'normal';
+        var layer_Krdmir_1 = new L.geoJson(json_Krdmir_1, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_Krdmir_1',
+            layerName: 'layer_Krdmir_1',
+            pane: 'pane_Krdmir_1',
+            onEachFeature: pop_Krdmir_1,
+            style: style_Krdmir_1_0,
+        });
+        bounds_group.addLayer(layer_Krdmir_1);
+        map.addLayer(layer_Krdmir_1);
+        map.createPane('pane_Torpaq_2');
+        map.getPane('pane_Torpaq_2').style.zIndex = 402;
+        var img_Torpaq_2 = 'data/Torpaq_2.png';
+        var img_bounds_Torpaq_2 = [[39.95113,47.7399],[40.62003,48.64957]];
+        var layer_Torpaq_2 = new L.imageOverlay(img_Torpaq_2,
+                                              img_bounds_Torpaq_2,
+                                              {pane: 'pane_Torpaq_2'});
+        bounds_group.addLayer(layer_Torpaq_2);
+        map.addLayer(layer_Torpaq_2);
+        map.createPane('pane_Urbanizasiya_3');
+        map.getPane('pane_Urbanizasiya_3').style.zIndex = 403;
+        var img_Urbanizasiya_3 = 'data/Urbanizasiya_3.png';
+        var img_bounds_Urbanizasiya_3 = [[39.95113,47.7399],[40.62003,48.64957]];
+        var layer_Urbanizasiya_3 = new L.imageOverlay(img_Urbanizasiya_3,
+                                              img_bounds_Urbanizasiya_3,
+                                              {pane: 'pane_Urbanizasiya_3'});
+        bounds_group.addLayer(layer_Urbanizasiya_3);
+        map.addLayer(layer_Urbanizasiya_3);
+        map.createPane('pane_Bitki_4');
+        map.getPane('pane_Bitki_4').style.zIndex = 404;
+        var img_Bitki_4 = 'data/Bitki_4.png';
+        var img_bounds_Bitki_4 = [[39.95113,47.7399],[40.62003,48.64957]];
+        var layer_Bitki_4 = new L.imageOverlay(img_Bitki_4,
+                                              img_bounds_Bitki_4,
+                                              {pane: 'pane_Bitki_4'});
+        bounds_group.addLayer(layer_Bitki_4);
+        map.addLayer(layer_Bitki_4);
+        map.createPane('pane_Bataqlq_5');
+        map.getPane('pane_Bataqlq_5').style.zIndex = 405;
+        var img_Bataqlq_5 = 'data/Bataqlq_5.png';
+        var img_bounds_Bataqlq_5 = [[39.95113,47.7399],[40.62003,48.64957]];
+        var layer_Bataqlq_5 = new L.imageOverlay(img_Bataqlq_5,
+                                              img_bounds_Bataqlq_5,
+                                              {pane: 'pane_Bataqlq_5'});
+        bounds_group.addLayer(layer_Bataqlq_5);
+        map.addLayer(layer_Bataqlq_5);
+        map.createPane('pane_Su_6');
+        map.getPane('pane_Su_6').style.zIndex = 406;
+        var img_Su_6 = 'data/Su_6.png';
+        var img_bounds_Su_6 = [[39.95113,47.7399],[40.62003,48.64957]];
+        var layer_Su_6 = new L.imageOverlay(img_Su_6,
+                                              img_bounds_Su_6,
+                                              {pane: 'pane_Su_6'});
+        bounds_group.addLayer(layer_Su_6);
+        map.addLayer(layer_Su_6);
+        function pop_Kndlrvrazisahlri_7(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (i in e.target._eventParents) {
+                        e.target._eventParents[i].resetStyle(e.target);
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['OBJECTID'] !== null ? autolinker.link(feature.properties['OBJECTID'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Name'] !== null ? autolinker.link(feature.properties['Name'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['UrbanName'] !== null ? autolinker.link(feature.properties['UrbanName'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['UrbanNum'] !== null ? autolinker.link(feature.properties['UrbanNum'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['StatCode'] !== null ? autolinker.link(feature.properties['StatCode'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Subordinat'] !== null ? autolinker.link(feature.properties['Subordinat'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Area'] !== null ? autolinker.link(feature.properties['Area'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Perimetr'] !== null ? autolinker.link(feature.properties['Perimetr'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Note'] !== null ? autolinker.link(feature.properties['Note'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['IEDType'] !== null ? autolinker.link(feature.properties['IEDType'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['SHAPE_Leng'] !== null ? autolinker.link(feature.properties['SHAPE_Leng'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['SHAPE_Area'] !== null ? autolinker.link(feature.properties['SHAPE_Area'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['OBJECTID_2'] !== null ? autolinker.link(feature.properties['OBJECTID_2'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Name_2'] !== null ? autolinker.link(feature.properties['Name_2'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['TypeAU'] !== null ? autolinker.link(feature.properties['TypeAU'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Subordinat_2'] !== null ? autolinker.link(feature.properties['Subordinat_2'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['StatCode_2'] !== null ? autolinker.link(feature.properties['StatCode_2'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['EconomRe'] !== null ? autolinker.link(feature.properties['EconomRe'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Area_2'] !== null ? autolinker.link(feature.properties['Area_2'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Perimetr_2'] !== null ? autolinker.link(feature.properties['Perimetr_2'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Note_2'] !== null ? autolinker.link(feature.properties['Note_2'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Shape_Leng_2'] !== null ? autolinker.link(feature.properties['Shape_Leng_2'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Shape_Area_2'] !== null ? autolinker.link(feature.properties['Shape_Area_2'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+        }
+
+        function style_Kndlrvrazisahlri_7_0() {
+            return {
+                pane: 'pane_Kndlrvrazisahlri_7',
+                opacity: 1,
+                color: 'rgba(219,210,226,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(164,113,88,0.0)',
+                interactive: true,
+            }
+        }
+        map.createPane('pane_Kndlrvrazisahlri_7');
+        map.getPane('pane_Kndlrvrazisahlri_7').style.zIndex = 407;
+        map.getPane('pane_Kndlrvrazisahlri_7').style['mix-blend-mode'] = 'normal';
+        var layer_Kndlrvrazisahlri_7 = new L.geoJson(json_Kndlrvrazisahlri_7, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_Kndlrvrazisahlri_7',
+            layerName: 'layer_Kndlrvrazisahlri_7',
+            pane: 'pane_Kndlrvrazisahlri_7',
+            onEachFeature: pop_Kndlrvrazisahlri_7,
+            style: style_Kndlrvrazisahlri_7_0,
+        });
+        bounds_group.addLayer(layer_Kndlrvrazisahlri_7);
+        map.addLayer(layer_Kndlrvrazisahlri_7);
+        var osmGeocoder = new L.Control.Geocoder({
+            collapsed: true,
+            position: 'topleft',
+            text: 'Search',
+            title: 'Testing'
+        }).addTo(map);
+        document.getElementsByClassName('leaflet-control-geocoder-icon')[0]
+        .className += ' fa fa-search';
+        document.getElementsByClassName('leaflet-control-geocoder-icon')[0]
+        .title += 'Search for a place';
+        var baseMaps = {};
+        L.control.layers(baseMaps,{'<img src="legend/Kndlrvrazisahlri_7.png" /> Kəndlər və ərazi sahələri': layer_Kndlrvrazisahlri_7,"Su": layer_Su_6,"Bataqlıq": layer_Bataqlq_5,"Bitki": layer_Bitki_4,"Urbanizasiya": layer_Urbanizasiya_3,"Torpaq": layer_Torpaq_2,'<img src="legend/Krdmir_1.png" /> Kürdəmir': layer_Krdmir_1,"Azərbaycan xəritəsi": layer_Azrbaycanxritsi_0,}).addTo(map);
+        setBounds();
+        var i = 0;
+        layer_Kndlrvrazisahlri_7.eachLayer(function(layer) {
+            var context = {
+                feature: layer.feature,
+                variables: {}
+            };
+            layer.bindTooltip((layer.feature.properties['Name'] !== null?String('<div style="color: #323232; font-size: 3pt; font-weight: bold; font-family: \'Open Sans ExtraBold\', sans-serif;">' + layer.feature.properties['Name']) + '</div>':''), {permanent: true, offset: [-0, -16], className: 'css_Kndlrvrazisahlri_7'});
+            labels.push(layer);
+            totalMarkers += 1;
+              layer.added = true;
+              addLabel(layer, i);
+              i++;
+        });
+        map.addControl(new L.Control.Search({
+            layer: layer_Krdmir_1,
+            initial: false,
+            hideMarkerOnCollapse: true,
+            propertyName: 'Name'}));
+        document.getElementsByClassName('search-button')[0].className +=
+         ' fa fa-binoculars';
+        L.ImageOverlay.include({
+            getBounds: function () {
+                return this._bounds;
+            }
+        });
+        resetLabels([layer_Kndlrvrazisahlri_7]);
+        map.on("zoomend", function(){
+            resetLabels([layer_Kndlrvrazisahlri_7]);
+        });
+        map.on("layeradd", function(){
+            resetLabels([layer_Kndlrvrazisahlri_7]);
+        });
+        map.on("layerremove", function(){
+            resetLabels([layer_Kndlrvrazisahlri_7]);
+        });
+        </script>
     </body>
 </html>
